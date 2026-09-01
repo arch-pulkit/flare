@@ -234,16 +234,13 @@ try:
             st.info("Run `python -m scripts.simulation_harness --scenario mttr` to populate metrics.")
             c1, c2, c3 = st.columns(3)
             c1.metric("False Positive Rate", "—")
-            c2.metric("Mean Time to Resolution", "—")
+            c2.metric("Pipeline Latency", "—")
             c3.metric("Time to Detect", "—")
         else:
             fpr_ratio = matrix.get("fpr_reduction_ratio") or 1.0
             fpr_legacy = matrix.get("fpr_legacy", 0.0)
             fpr_flare = matrix.get("fpr_flare", 0.0)
             mttr_flare = matrix.get("mttr_flare_seconds", 0.0)
-            mttr_legacy = matrix.get("mttr_legacy_seconds", 900.0)
-            mttr_legacy_simple = matrix.get("mttr_legacy_simple_seconds", 300.0)
-            mttr_legacy_novel = matrix.get("mttr_legacy_novel_seconds", 900.0)
             ttd_flare = matrix.get("ttd_flare_seconds", 0.0)
             ttd_adv = matrix.get("ttd_advantage_seconds", 0.0)
 
@@ -255,18 +252,16 @@ try:
                 delta_color="normal",
             )
             c2.metric(
-                "Mean Time to Resolution",
+                "Pipeline Latency",
                 f"{mttr_flare:.1f}s",
-                delta=f"vs {mttr_legacy:.0f}s manual (novel)",
-                delta_color="inverse",
+                delta="detected → audited",
+                delta_color="off",
             )
             with c2:
                 st.caption(
-                    f"FLARE automates spec retrieval + LLM recommendation + cryptographic audit. "
-                    f"Novel anomaly track: {mttr_legacy_novel:.0f}s legacy "
-                    f"(Hundman et al. KDD 2018). "
-                    f"Simple/known pattern: {mttr_legacy_simple:.0f}s legacy. "
-                    f"Both vs FLARE: {mttr_flare:.1f}s measured end-to-end."
+                    "Machine processing time: spec retrieval, LLM recommendation, "
+                    "and cryptographic audit. Not a human resolution time — no "
+                    "speedup against manual triage is claimed."
                 )
             if ttd_adv > 0:
                 c3.metric(
@@ -285,24 +280,28 @@ try:
 
         with st.expander("About these metrics"):
             st.markdown(
-                "**FPR:** 3-frame burst → 1 FLARE escalation vs N legacy alarms. "
-                "Ratio improves with real SMAP data noise floor.\n\n"
-                "**MTTR:** Measured from `AnomalyDetected.detected_at` to "
-                "`AuditCompleted.audited_at`. Includes retrieval, LLM call, and ASTR-O "
-                "cryptographic audit. Measured FLARE MTTR: ~5.8s.\n\n"
-                "Two legacy baselines:\n"
-                "- **Simple/known anomaly: 300s** (conservative floor — experienced "
-                "engineer, no spec lookup required)\n"
-                "- **Novel anomaly (FLARE's case): 900s** (15 min) — consistent with "
-                "manual ops burden characterised by Hundman et al. KDD 2018 and NASA NTRS "
-                "20210007857. This is the correct comparison for FLARE, which automates "
-                "spec retrieval and recommendation generation end-to-end.\n\n"
-                "Reductions: 52× (simple) / 155× (novel). "
-                "Use `python -m scripts.simulation_harness --scenario mttr --mttr-legacy 300` "
-                "for conservative mode.\n\n"
-                "**TTD:** Threshold-crossing anomalies only. Statistical deviation "
-                "detection (anomalies invisible to legacy) pending empirical "
-                "verification on real SMAP data."
+                "All figures above are read from the persisted validation matrix "
+                "in hot_storage. This panel describes how each is derived; it does "
+                "not restate values, so it cannot drift out of step with them.\n\n"
+                "**FPR:** FLARE escalations versus legacy threshold alarms over the "
+                "same frames. Detection is unsupervised, so ground truth is "
+                "manufactured — `scripts/inject_anomalies.py` places known anomalies "
+                "at known frames and `LegacyBaseline` runs a pure threshold check "
+                "over the identical sequence.\n\n"
+                "**Pipeline latency:** measured from `AnomalyDetected.detected_at` to "
+                "`AuditCompleted.audited_at`. Covers retrieval, the LLM call, and the "
+                "ASTR-O cryptographic audit.\n\n"
+                "This is machine processing time. It is **not** a human resolution "
+                "time, and a ratio against one would not be a like-for-like "
+                "comparison — FLARE produces a signed, grounded recommendation, not "
+                "a closed-out incident. No such ratio is claimed here.\n\n"
+                "**TTD:** threshold-crossing anomalies only, and expected to be "
+                "*slower* than the legacy baseline — `MIN_CONSECUTIVE_FRAMES = 3` "
+                "trades detection latency for a lower false-positive rate. Detection "
+                "of in-nominal statistical deviations is verified at the detector "
+                "level only; pruning check 1 suppresses those before escalation, so "
+                "it is not an end-to-end claim.\n\n"
+                "Regenerate with `python -m scripts.simulation_harness --scenario fpr`."
             )
 
     st.divider()

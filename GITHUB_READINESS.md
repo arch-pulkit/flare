@@ -1,15 +1,16 @@
 # FLARE — GitHub Upload Readiness Audit
 
 **Audited:** 2026-09-01 · Full file-by-file review
-**Repo path:** `/Users/dr_bolty/Projects/flare` (moved since the audit; ASTR-O is now at
-`/Users/dr_bolty/Projects/astr-o`)
+**Repo path:** `/Users/dr_bolty/Projects/flare` — moved since the audit. ASTR-O moved too
+and now lives at `/Users/dr_bolty/Projects/astr-o`.
 **Test status:** 71/71 passing (`python -m pytest tests/ -q`)
 
 > **Remediation status — updated 2026-09-01.** Git is initialised and the tree is
 > committed. Blockers 1, 3, 5, and 6 are resolved; blocker 4 is fixed in code but the
 > benchmark has not been re-run, so **no FPR figure should be quoted yet**. Blocker 2
-> (publishing ASTR-O) is unresolved and still gates installability. See the checklist
-> at the bottom for current state.
+> (ASTR-O availability) is not a defect to fix — ASTR-O is in its deployment phase and
+> not yet public — but it does gate third-party installability until release. See the
+> checklist at the bottom for current state.
 
 ---
 
@@ -44,12 +45,28 @@ ones that do.
 
 Total to exclude across all categories: ~480 files / 472 MB.
 
-### 2. ASTR-O cannot be installed by anyone else
+### 2. ASTR-O is not yet public — FLARE is not third-party installable until it is
+
+**Status: expected, not a defect.** ASTR-O is in its deployment phase and has not been
+released. This is a sequencing constraint on FLARE's publication, not a bug to fix here.
 
 Hard import in `flare/audit/handlers.py`, `flare/pipeline.py`, `config/schema_builder.py`,
-and `build_registry.py`. Installed editable from `/Users/dr_bolty/astr-o`, which **is not a
-git repository** and has never been pushed. `requirements.txt` does not list it. README
-links to `github.com/arch-pulkit/ASTR-O` — nothing can install FLARE until that repo exists.
+and `build_registry.py`, so FLARE will not start without it. It is installed editable from
+a local checkout at `/Users/dr_bolty/Projects/astr-o` and is not on PyPI, so it cannot be
+a resolvable line in `requirements.txt`.
+
+Resolved since the audit:
+
+- The editable install still pointed at the pre-move path `/Users/dr_bolty/astr-o`, so
+  `import astr_o` failed with `ModuleNotFoundError` and the test suite could not run at
+  all. Reinstalled from the new location.
+- README no longer links to `github.com/arch-pulkit/ASTR-O`. That repo is not live, so
+  the link 404'd for any reader who followed it. README and `requirements.txt` now state
+  the deployment-phase status and document the editable-install route instead.
+
+Remaining: FLARE can be published before ASTR-O, but the README must keep saying plainly
+that the audit layer is not yet available, or reviewers will clone it and hit an import
+error on the first run.
 
 ### 3. `run_pipeline.py:208` — `logger` is never defined
 
@@ -107,7 +124,7 @@ Legend: ✅ ready to commit · ⚠️ needed but not ready · ⛔ do not commit 
 | File / Path | Verdict | Note |
 |---|---|---|
 | **Root** | | |
-| `README.md` | ⚠️ Not ready | Install steps unfollowable until ASTR-O is published; no license section |
+| `README.md` | ✅ Ready | ASTR-O deployment-phase status + editable install documented; license section added |
 | `ARCHITECTURE.md` | ✅ Ready | |
 | `SPRINT_LOG.md` | ✅ Ready | |
 | `CLAUDE.md` | ✅ Ready | Agent-facing, but harmless and useful to publish |
@@ -193,7 +210,8 @@ data/schema_registry.db-wal
       persisted validation matrix predates the counter fix and is stale
 - [x] Update `dashboard/app.py` stale metric text — commit `258bf50`
 - [x] Document the ASTR-O install path in `requirements.txt` — commit `b2ffe1d`
-- [ ] Publish ASTR-O, or vendor it / mark FLARE as not-yet-runnable standalone
+- [x] Mark FLARE as not-yet-runnable standalone — README and `requirements.txt` state
+      ASTR-O's deployment-phase status; publishing ASTR-O itself is a separate release
 - [x] Add `LICENSE` — Apache 2.0, commit `67ce2fb`
 - [x] Add `.env.example` — commit `b2ffe1d`
 - [x] Confirm tracked file count before first commit — 69 files
@@ -204,8 +222,10 @@ data/schema_registry.db-wal
    changes the measured escalation count, so every FPR figure in the persisted matrix
    is stale. The honest number may be materially worse than the 3.6× previously claimed.
    Nothing should quote an FPR reduction until this runs.
-2. **ASTR-O is still unpublished and unversioned.** No third party can install FLARE.
-   It is not a git repository at its new path either.
+2. **ASTR-O release gates third-party installability.** It is in its deployment phase
+   and not yet public, which is expected — but until it ships, nobody outside this
+   machine can run FLARE end-to-end. It is also not under version control at its new
+   path (`/Users/dr_bolty/Projects/astr-o`); worth doing before release.
 3. **Fill in the LICENSE copyright holder.** The Apache appendix keeps the
    `[yyyy] [name of copyright owner]` template.
 4. **Rotate `ASTR_O_REGISTRY_SECRET`.** The local `.env` sets it to a short dictionary

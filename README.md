@@ -15,7 +15,22 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-Requires [ASTR-O](https://github.com/arch-pulkit/ASTR-O) installed separately — it provides the audit layer.
+Requires **ASTR-O**, which provides the audit layer — the grounding checks, criteria
+gate, and HMAC-SHA256 report signing. FLARE imports it directly and will not start
+without it.
+
+ASTR-O is currently in its deployment phase and **not yet public**, so there is no
+clone URL to point at and it is not on PyPI. Until it is released, FLARE runs only
+where ASTR-O is already available locally; install it editable from your checkout
+before installing the requirements above:
+
+```bash
+pip install -e /path/to/astr-o
+```
+
+If the checkout moves after installation, the editable install keeps pointing at the
+old absolute path and `import astr_o` fails with `ModuleNotFoundError`. Re-run
+`pip install -e .` from the new location.
 
 Create `.env` (never commit):
 

@@ -11,12 +11,12 @@ torch>=2.0
 # flare/audit/handlers.py, config/schema_builder.py and build_registry.py.
 # FLARE will not import without it.
 #
-# Not published to PyPI, so it cannot be listed as a resolvable requirement
-# here; a bare `astr_o` line would only make `pip install -r` fail. Install it
-# from a local checkout before installing this file:
+# ASTR-O is in its deployment phase and not yet public: there is no clone URL
+# and it is not on PyPI, so it cannot be listed as a resolvable requirement
+# here. A bare `astr_o` line would only make `pip install -r` fail. Install it
+# editable from a local checkout before installing this file:
 #
-#     git clone <astr-o-repo-url> astr-o
-#     pip install -e ./astr-o
+#     pip install -e /path/to/astr-o
 #
 # If the checkout is moved after installation, the editable install keeps
 # pointing at the old absolute path and `import astr_o` fails with

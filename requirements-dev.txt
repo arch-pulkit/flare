@@ -1,0 +1,6 @@
+-r requirements.txt
+openai>=1.30
+skl2onnx>=1.20.0
+pytest>=8.0
+streamlit>=1.35.0
+watchdog

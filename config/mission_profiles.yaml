@@ -1,0 +1,17 @@
+SKYROOT_M1:
+  mission_id: SKYROOT_M1
+  nominal_ranges:
+    BUS_VOLTAGE:        [27.5, 32.5]
+    SOLAR_CURRENT:      [2.0, 8.0]
+    THRUSTER_TEMP:      [280.0, 380.0]
+    TANK_PRESSURE:      [200000.0, 350000.0]
+    REACTION_WHEEL_RPM: [1000.0, 6000.0]
+    TX_FREQUENCY:       [437000000.0, 437100000.0]
+  anomaly_threshold: -0.58
+  decision_threshold: -0.58
+  registry_path: data/knowledge_base/reference_registry.json
+  docs_folder: data/knowledge_base
+  registry_config_path: config/registry_config.json
+  model_path: models/isolation_forest.joblib
+  llm_model: gpt-4o-mini
+  top_k: 5

@@ -1,0 +1,55 @@
+{
+  "created_at": "2026-06-09T09:51:42Z",
+  "documents": [
+    {
+      "document_id": "doc_001",
+      "document_type": "SPECIFICATION",
+      "filename": "voltage_spec.txt",
+      "hash": "sha256:c522f521a508a7d1f607822df064d77645e0ec050baf09fcddd31f2c3171e707",
+      "ingested_at": "2026-06-09T09:51:42Z",
+      "source_tier": "CRITICAL"
+    },
+    {
+      "document_id": "doc_002",
+      "document_type": "SPECIFICATION",
+      "filename": "thermal_spec.txt",
+      "hash": "sha256:986eda85407a313b0d1fb75920c7be51bab6a8fc84244823ef2bbf19bcde1965",
+      "ingested_at": "2026-06-09T09:51:42Z",
+      "source_tier": "CRITICAL"
+    },
+    {
+      "document_id": "doc_003",
+      "document_type": "SPECIFICATION",
+      "filename": "pressure_spec.txt",
+      "hash": "sha256:e40ca016a98f5094301888650bf501cbc3916da1ab88a4af1f71f1ea80a53d18",
+      "ingested_at": "2026-06-09T09:51:42Z",
+      "source_tier": "SUPPORTING"
+    },
+    {
+      "document_id": "doc_004",
+      "document_type": "SPECIFICATION",
+      "filename": "adcs_spec.txt",
+      "hash": "sha256:7cf42702f6c058a511bafe3b7aa685316b43616f88ec34dd200a1f6870bc8e93",
+      "ingested_at": "2026-06-09T09:51:42Z",
+      "source_tier": "CRITICAL"
+    },
+    {
+      "document_id": "doc_005",
+      "document_type": "SPECIFICATION",
+      "filename": "comms_spec.txt",
+      "hash": "sha256:06ce01fc7615397767bcada008d2618ffe8f19f92b22627c9dab79f42254b67a",
+      "ingested_at": "2026-06-09T09:51:42Z",
+      "source_tier": "CRITICAL"
+    },
+    {
+      "document_id": "doc_006",
+      "document_type": "SPECIFICATION",
+      "filename": "eps_detailed_spec.txt",
+      "hash": "sha256:f46d61658208838476c05ff555dea8451c629432af3e5a0b2b4bef71459ba814",
+      "ingested_at": "2026-06-09T09:51:42Z",
+      "source_tier": "CRITICAL"
+    }
+  ],
+  "mission_id": "SKYROOT_M1",
+  "signature": "3faec055105508fee79c91f0a016e030d945940861ffdcc1f780143e2dcfe7e8"
+}

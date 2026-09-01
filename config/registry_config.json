@@ -1,0 +1,17 @@
+{
+    "mission_id": "SKYROOT_M1",
+    "documents": [
+        {"document_id": "doc_001", "filename": "voltage_spec.txt",
+         "source_tier": "CRITICAL", "document_type": "SPECIFICATION"},
+        {"document_id": "doc_002", "filename": "thermal_spec.txt",
+         "source_tier": "CRITICAL", "document_type": "SPECIFICATION"},
+        {"document_id": "doc_003", "filename": "pressure_spec.txt",
+         "source_tier": "SUPPORTING", "document_type": "SPECIFICATION"},
+        {"document_id": "doc_004", "filename": "adcs_spec.txt",
+         "source_tier": "CRITICAL", "document_type": "SPECIFICATION"},
+        {"document_id": "doc_005", "filename": "comms_spec.txt",
+         "source_tier": "CRITICAL", "document_type": "SPECIFICATION"},
+        {"document_id": "doc_006", "filename": "eps_detailed_spec.txt",
+         "source_tier": "CRITICAL", "document_type": "SPECIFICATION"}
+    ]
+}

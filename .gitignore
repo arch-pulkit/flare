@@ -1,0 +1,28 @@
+data/smap_raw/
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+hot_storage/
+hot_storage_sim/
+cold_storage/
+telemanom-master/
+telemanom.zip
+
+# Raw SMAP dataset — fetch from Kaggle, see README
+data/train/
+data/test/
+
+# Orphaned telemanom output — not referenced by FLARE code
+data/2018-05-19_15.00.10/
+
+# Runtime-generated schema registry
+data/schema_registry.db
+data/schema_registry.db-shm
+data/schema_registry.db-wal
+
+# OS / editor / agent-local config
+.DS_Store
+.vscode/
+.claude/settings.local.json

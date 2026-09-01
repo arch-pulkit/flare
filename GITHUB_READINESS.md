@@ -204,16 +204,16 @@ data/schema_registry.db-wal
 
 - [x] `git init` inside `flare/` — initialised on `main`
 - [x] Extend `.gitignore` — 69 files / 6.0 MB tracked, down from ~480 files / 472 MB
-- [x] Fix `run_pipeline.py` undefined `logger` — commit `6e965a9`
-- [x] Fix `simulation_harness.py` escalation counter — commit `9a7294a`, regression test added
+- [x] Fix `run_pipeline.py` undefined `logger` — commit `a98ae90`
+- [x] Fix `simulation_harness.py` escalation counter — commit `6f8fe11`, regression test added
 - [ ] **Re-run the benchmark and update the reported FPR** — still outstanding; the
       persisted validation matrix predates the counter fix and is stale
-- [x] Update `dashboard/app.py` stale metric text — commit `258bf50`
-- [x] Document the ASTR-O install path in `requirements.txt` — commit `b2ffe1d`
+- [x] Update `dashboard/app.py` stale metric text — commit `efb321d`
+- [x] Document the ASTR-O install path in `requirements.txt` — commit `bbfb48a`
 - [x] Mark FLARE as not-yet-runnable standalone — README and `requirements.txt` state
       ASTR-O's deployment-phase status; publishing ASTR-O itself is a separate release
-- [x] Add `LICENSE` — Apache 2.0, commit `67ce2fb`
-- [x] Add `.env.example` — commit `b2ffe1d`
+- [x] Add `LICENSE` — Apache 2.0, commit `b0a9a51`
+- [x] Add `.env.example` — commit `bbfb48a`
 - [x] Confirm tracked file count before first commit — 69 files
 
 ### Still open

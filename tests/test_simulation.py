@@ -229,3 +229,103 @@ def test_invisible_scenario_config() -> None:
         f"must be inside nominal range ({lo}, {hi}) — "
         "it is an invisible anomaly, not a threshold-crossing one"
     )
+
+
+# ---------------------------------------------------------------------------
+# 10 — escalation counting survives a SAFE incident resolving in-call
+#
+# Regression guard. run_flare_on_sequence() used to count escalations by an
+# open_incidents() delta sampled either side of process_frame(). A SAFE verdict
+# resolves the incident *inside* that call, so it was absent from both samples
+# and every SAFE escalation went uncounted — deflating escalation_count to zero
+# on an all-SAFE run and inflating the reported FPR reduction.
+# ---------------------------------------------------------------------------
+
+def _audit(incident_id: str, status: str = "SAFE"):
+    from flare.audit.events import AuditCompleted
+    import uuid, time
+
+    return AuditCompleted(
+        event_id=str(uuid.uuid4()),
+        incident_id=incident_id,
+        parent_event_id=str(uuid.uuid4()),
+        status=status,
+        signed_report={},
+        signed_error_record=None,
+        causal_chain=None,
+        metrics={},
+        pipeline_completion_map={},
+        degraded_confidence=False,
+        report_path="",
+        audited_at=time.time(),
+    )
+
+
+class _StubIncident:
+    def __init__(self, incident_id: str, opened_at: float) -> None:
+        self.incident_id = incident_id
+        self.opened_at = opened_at
+
+
+class _StubRepository:
+    """Models the real behaviour: a SAFE incident is resolved before the call returns,
+    so it is never visible in open_incidents() from the caller's perspective."""
+
+    def __init__(self) -> None:
+        self._all: dict[str, _StubIncident] = {}
+
+    def open_incidents(self) -> list:
+        return []  # every incident resolved SAFE in-call
+
+    def get(self, incident_id: str):
+        return self._all.get(incident_id)
+
+    def _record(self, incident_id: str, opened_at: float) -> None:
+        self._all[incident_id] = _StubIncident(incident_id, opened_at)
+
+
+class _StubPipeline:
+    """Escalates on every frame whose row_index is in escalate_on."""
+
+    def __init__(self, escalate_on: set[int]) -> None:
+        self.repository = _StubRepository()
+        self.last_audit = None
+        self.last_recommendation = None
+        self._escalate_on = escalate_on
+        self._n = 0
+
+    def process_frame(self, frame, context_window, window_stats) -> None:
+        import time, uuid
+
+        if frame.row_index in self._escalate_on:
+            self._n += 1
+            incident_id = f"inc-{self._n}"
+            self.repository._record(incident_id, time.time())
+            self.last_audit = _audit(incident_id, status="SAFE")
+
+
+def test_escalation_counted_when_safe_incident_resolves_in_call() -> None:
+    """All-SAFE run must report a non-zero escalation_count."""
+    from scripts.simulation_harness import run_flare_on_sequence
+
+    profiles = yaml.safe_load(Path("config/mission_profiles.yaml").read_text())
+    mission_profile = profiles["SKYROOT_M1"]
+
+    all_frames, _ = build_injected_sequence(_CSV, _tp_spec())
+    frames = all_frames[:40]
+    assert len(frames) >= 10, "need enough frames to escalate on"
+
+    escalate_rows = {frames[3].row_index, frames[7].row_index}
+    pipeline = _StubPipeline(escalate_on=escalate_rows)
+
+    result = run_flare_on_sequence(frames, pipeline, mission_profile)
+
+    # The bug produced 0 here while two SAFE audits were emitted.
+    assert result.escalation_count == 2, (
+        f"expected 2 escalations, got {result.escalation_count} "
+        "— SAFE escalations are being dropped by the counter"
+    )
+    assert set(result.escalation_frames) == escalate_rows
+    assert result.escalation_rate == pytest.approx(2 / len(frames))
+    # MTTR path must still see both incidents
+    assert len(result.incident_timings) == 2

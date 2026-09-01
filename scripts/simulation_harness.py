@@ -129,7 +129,10 @@ def run_flare_on_sequence(
 ) -> FLAREResult:
     """Run every frame through FLAREPipeline, return populated FLAREResult.
 
-    Escalations tracked via open_incidents() delta (same pattern as run_pipeline.py).
+    Escalations tracked by a change in pipeline.last_audit.event_id (same pattern
+    as run_pipeline.py). An open_incidents() delta cannot be used: a SAFE verdict
+    resolves the incident inside the same process_frame() call, so the incident is
+    absent from both sample points and every SAFE escalation goes uncounted.
     MTTR timings collected via pipeline.last_audit after each frame.
     ChannelWindowManager instantiated fresh — does not share state with other runs.
     """
@@ -142,54 +145,43 @@ def run_flare_on_sequence(
     escalation_frames: list[int] = []
     channel_escalation_counts: dict[str, int] = {}
     incident_detected_at: dict[str, float] = {}  # incident_id → detected_at (opened_at)
+    seen_audit_id: str | None = None
 
     for frame in frames:
         context_window, window_stats = channel_manager.update_with_profile(
             frame, mission_profile
         )
-        prev_open_ids = {
-            i.incident_id for i in pipeline.repository.open_incidents()  # type: ignore[union-attr]
-        }
         pipeline.process_frame(frame, context_window, window_stats)  # type: ignore[union-attr]
 
-        # Collect AuditCompleted from pipeline.last_audit (set by process_frame on each escalation)
+        # An escalation is a new audit event, regardless of the verdict it carried.
+        # process_frame() sets last_audit on every escalation; a fresh event_id is
+        # the only signal that survives a SAFE incident resolving in-call.
         audit_ev = pipeline.last_audit  # type: ignore[union-attr]
-        if audit_ev is not None:
-            captured_audits[audit_ev.incident_id] = audit_ev
-
-        curr_open_ids = {
-            i.incident_id for i in pipeline.repository.open_incidents()  # type: ignore[union-attr]
-        }
-        new_ids = curr_open_ids - prev_open_ids
-        for inc_id in new_ids:
+        if audit_ev is not None and audit_ev.event_id != seen_audit_id:
+            seen_audit_id = audit_ev.event_id
+            inc_id = audit_ev.incident_id
+            captured_audits[inc_id] = audit_ev
             escalation_frames.append(frame.row_index)
             channel_escalation_counts[frame.channel_id] = (
                 channel_escalation_counts.get(frame.channel_id, 0) + 1
             )
             incident = pipeline.repository.get(inc_id)  # type: ignore[union-attr]
             if incident is not None:
-                incident_detected_at[inc_id] = incident.opened_at
+                incident_detected_at.setdefault(inc_id, incident.opened_at)
 
-    # Build incident_timings from captured audits
+    # Build incident_timings from captured audits. Every audited incident has an
+    # opened_at recorded in the loop above; the repository lookup is a fallback for
+    # the case where the incident could not be read back at escalation time.
     incident_timings: dict[str, tuple[float, float]] = {}
-    for inc_id, detected_at in incident_detected_at.items():
-        if inc_id in captured_audits:
-            incident_timings[inc_id] = (detected_at, captured_audits[inc_id].audited_at)
-
-    # Also capture timings for incidents audited but not yet in incident_detected_at
-    # (SAFE incidents resolve immediately and may be missed by open_incidents() delta)
     for inc_id, audit_ev in captured_audits.items():
-        if inc_id not in incident_timings:
+        detected_at = incident_detected_at.get(inc_id)
+        if detected_at is None:
             incident = pipeline.repository.get(inc_id)  # type: ignore[union-attr]
-            if incident is not None:
-                detected_at = incident.opened_at
-                incident_timings[inc_id] = (detected_at, audit_ev.audited_at)
-                if inc_id not in incident_detected_at:
-                    logger.debug(
-                        "SAFE incident %s captured via audit fallback — "
-                        "resolved before open_incidents() delta check",
-                        inc_id,
-                    )
+            if incident is None:
+                logger.debug("No opened_at for audited incident %s — skipped", inc_id)
+                continue
+            detected_at = incident.opened_at
+        incident_timings[inc_id] = (detected_at, audit_ev.audited_at)
 
     total = len(frames)
     esc_count = len(escalation_frames)

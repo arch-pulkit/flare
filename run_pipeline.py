@@ -6,6 +6,12 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from flare.ingestion.frame import TelemetryFrame
+
+logger = logging.getLogger("flare.cli")
 
 
 # ---------------------------------------------------------------------------

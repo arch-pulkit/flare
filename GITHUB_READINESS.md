@@ -77,7 +77,7 @@ traceback.
 `TelemetryFrame` at line 166 is also undefined, but harmless — `from __future__ import
 annotations` means the local variable annotation is never evaluated. Lint error only.
 
-### 4. `simulation_harness.py` reproduces the bug CLAUDE.md #35 says was fixed
+### 4. `simulation_harness.py` reproduces a known, already-documented bug
 
 `run_flare_on_sequence` counts escalations by `open_incidents()` delta — the pattern its
 docstring still calls "same pattern as run_pipeline.py", which is stale since
@@ -92,7 +92,8 @@ This corrupts the headline number:
 - Not one RESOLVED incident could have been counted
 
 MTTR survives only because a separate audit-fallback path captures timings. FPR — described
-in `CLAUDE.md` as "the metric that holds up" — is inflated by an unknown but large factor.
+in the engineering notes as "the metric that holds up" — is inflated by an unknown but
+large factor.
 
 **Fix:** switch the detection condition to watch `pipeline.last_audit.event_id` change,
 matching `run_pipeline.py`. Then re-run the benchmark. The honest FPR number may be
@@ -127,7 +128,6 @@ Legend: ✅ ready to commit · ⚠️ needed but not ready · ⛔ do not commit 
 | `README.md` | ✅ Ready | ASTR-O deployment-phase status + editable install documented; license section added |
 | `ARCHITECTURE.md` | ✅ Ready | |
 | `SPRINT_LOG.md` | ✅ Ready | |
-| `CLAUDE.md` | ✅ Ready | Agent-facing, but harmless and useful to publish |
 | `GITHUB_READINESS.md` | ✅ Ready | This file |
 | `run_pipeline.py` | ⚠️ Not ready | Undefined `logger` (L208); undefined `TelemetryFrame` annotation (L166) |
 | `build_registry.py` | ✅ Ready | |
@@ -139,7 +139,7 @@ Legend: ✅ ready to commit · ⚠️ needed but not ready · ⛔ do not commit 
 | `.env` | ⛔ Ignore | Already ignored ✓ |
 | `.DS_Store` | ⛔ Ignore | Not currently ignored |
 | `.vscode/settings.json` | ⛔ Ignore | Local editor config |
-| `.claude/settings.local.json` | ⛔ Ignore | Contains absolute local paths |
+| `*.local.json` | ⛔ Ignore | Local tool config, absolute paths |
 | `__pycache__/`, `.pytest_cache/` | ⛔ Ignore | Already ignored ✓ |
 | **flare/** | | |
 | `ingestion/frame.py`, `ingestion/reader.py` | ✅ Ready | |
@@ -192,10 +192,10 @@ data/schema_registry.db
 data/schema_registry.db-shm
 data/schema_registry.db-wal
 
-# OS / editor
+# OS / editor / local tool config
 .DS_Store
 .vscode/
-.claude/
+*.local.json
 ```
 
 ---

@@ -22,7 +22,7 @@ data/schema_registry.db
 data/schema_registry.db-shm
 data/schema_registry.db-wal
 
-# OS / editor / agent-local config
+# OS / editor / local tool config
 .DS_Store
 .vscode/
-.claude/settings.local.json
+*.local.json

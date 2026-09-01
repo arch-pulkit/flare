@@ -6,3 +6,18 @@ onnxruntime>=1.17
 pyyaml>=6.0
 sentence-transformers>=3.0
 torch>=2.0
+
+# ASTR-O — the audit layer. Imported by flare/pipeline.py,
+# flare/audit/handlers.py, config/schema_builder.py and build_registry.py.
+# FLARE will not import without it.
+#
+# Not published to PyPI, so it cannot be listed as a resolvable requirement
+# here; a bare `astr_o` line would only make `pip install -r` fail. Install it
+# from a local checkout before installing this file:
+#
+#     git clone <astr-o-repo-url> astr-o
+#     pip install -e ./astr-o
+#
+# If the checkout is moved after installation, the editable install keeps
+# pointing at the old absolute path and `import astr_o` fails with
+# ModuleNotFoundError — re-run `pip install -e .` from the new location.

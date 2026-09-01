@@ -84,3 +84,11 @@ config/         mission profiles, schema builder
 data/           telemetry.csv, knowledge base, signed registry
 tests/          pytest
 ```
+
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE).
+
+The copyright line in the license appendix is the unmodified Apache
+template. Replace `[yyyy] [name of copyright owner]` with the year and the
+holder you want on record before publishing.

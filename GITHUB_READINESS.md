@@ -1,7 +1,15 @@
 # FLARE — GitHub Upload Readiness Audit
 
-**Audited:** 2026-09-01 · Full file-by-file review of `/Users/dr_bolty/flare`
-**Test status at audit time:** 70/70 passing in 53s (`python -m pytest tests/ -q`)
+**Audited:** 2026-09-01 · Full file-by-file review
+**Repo path:** `/Users/dr_bolty/Projects/flare` (moved since the audit; ASTR-O is now at
+`/Users/dr_bolty/Projects/astr-o`)
+**Test status:** 71/71 passing (`python -m pytest tests/ -q`)
+
+> **Remediation status — updated 2026-09-01.** Git is initialised and the tree is
+> committed. Blockers 1, 3, 5, and 6 are resolved; blocker 4 is fixed in code but the
+> benchmark has not been re-run, so **no FPR figure should be quoted yet**. Blocker 2
+> (publishing ASTR-O) is unresolved and still gates installability. See the checklist
+> at the bottom for current state.
 
 ---
 
@@ -177,13 +185,30 @@ data/schema_registry.db-wal
 
 ## Pre-upload checklist
 
-- [ ] `git init` inside `flare/`
-- [ ] Extend `.gitignore` (above)
-- [ ] Fix `run_pipeline.py` undefined `logger`
-- [ ] Fix `simulation_harness.py` escalation counter → re-run benchmark → update reported FPR
-- [ ] Update `dashboard/app.py` stale metric text
-- [ ] Add `astr_o` to `requirements.txt` (or document the install path)
+- [x] `git init` inside `flare/` — initialised on `main`
+- [x] Extend `.gitignore` — 69 files / 6.0 MB tracked, down from ~480 files / 472 MB
+- [x] Fix `run_pipeline.py` undefined `logger` — commit `6e965a9`
+- [x] Fix `simulation_harness.py` escalation counter — commit `9a7294a`, regression test added
+- [ ] **Re-run the benchmark and update the reported FPR** — still outstanding; the
+      persisted validation matrix predates the counter fix and is stale
+- [x] Update `dashboard/app.py` stale metric text — commit `258bf50`
+- [x] Document the ASTR-O install path in `requirements.txt` — commit `b2ffe1d`
 - [ ] Publish ASTR-O, or vendor it / mark FLARE as not-yet-runnable standalone
-- [ ] Add `LICENSE`
-- [ ] Add `.env.example`
-- [ ] `git status --porcelain -uall | wc -l` → confirm well under 480 before first commit
+- [x] Add `LICENSE` — Apache 2.0, commit `67ce2fb`
+- [x] Add `.env.example` — commit `b2ffe1d`
+- [x] Confirm tracked file count before first commit — 69 files
+
+### Still open
+
+1. **Re-run `python -m scripts.simulation_harness --scenario fpr`.** The counter fix
+   changes the measured escalation count, so every FPR figure in the persisted matrix
+   is stale. The honest number may be materially worse than the 3.6× previously claimed.
+   Nothing should quote an FPR reduction until this runs.
+2. **ASTR-O is still unpublished and unversioned.** No third party can install FLARE.
+   It is not a git repository at its new path either.
+3. **Fill in the LICENSE copyright holder.** The Apache appendix keeps the
+   `[yyyy] [name of copyright owner]` template.
+4. **Rotate `ASTR_O_REGISTRY_SECRET`.** The local `.env` sets it to a short dictionary
+   word. It is the HMAC key over the reference registry. `.env` is correctly ignored,
+   so nothing leaked, but the value is weak for a demo that presents cryptographic
+   grounding as a feature.
